@@ -1,0 +1,30 @@
+services:
+  application:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - ENVIRONMENT=dev
+    restart: always
+    volumes:
+      - .:/code
+      - /code/.venv
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DEBUG=true
+      - DB_ECHO=true
+
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 15
